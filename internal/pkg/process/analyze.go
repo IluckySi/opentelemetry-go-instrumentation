@@ -80,13 +80,13 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	if err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST"，"elfF"， elfF)
+	a.logger.Info("I_TEST"，"elfF"， elfF)
 
 	goVersion, err := version.NewVersion(a.BuildInfo.GoVersion)
 	if err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST"，"GoVersion"， goVersion)
+	a.logger.Info("I_TEST"，"GoVersion"， goVersion)
 
 	result.GoVersion = goVersion
 	result.Libraries = make(map[string]*version.Version, len(a.BuildInfo.Deps)+1)
@@ -100,7 +100,7 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	}
 	result.Libraries["std"] = goVersion
 
-	logger.Info("I_TEST"，"relevantFuncs"， relevantFuncs)
+	a.logger.Info("I_TEST"，"relevantFuncs"， relevantFuncs)
 	funcs, err := a.findFunctions(elfF, relevantFuncs)
 	if err != nil {
 		return nil, err
@@ -128,12 +128,12 @@ func (a *Analyzer) SetBuildInfo(pid int) error {
 	if err != nil {
 		return err
 	}
-	a.logger.info("I_TEST", "buildinfo", bi)
+	a.logger.Info("I_TEST", "buildinfo", bi)
 	bi.GoVersion = parseGoVersion(bi.GoVersion)
-	a.logger.info("I_TEST", "GoVersion", bi.GoVersion)
+	a.logger.Info("I_TEST", "GoVersion", bi.GoVersion)
 
 	a.BuildInfo = bi
-	a.logger.info("I_TEST", "a.BuildInfo", a.BuildInfo)
+	a.logger.Info("I_TEST", "a.BuildInfo", a.BuildInfo)
 	return nil
 }
 

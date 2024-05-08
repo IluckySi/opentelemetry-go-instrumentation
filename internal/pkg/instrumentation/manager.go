@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/alibaba/ilogtail/pkg/logger"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
 	"github.com/go-logr/logr"
@@ -74,13 +73,15 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionSymbol) error {
 	// Validate that dependent probes point to real standalone probes.
 	funcsMap := make(map[string]interface{})
-	logger.Info("I_TEST", "symbols", symbols)
+	m.logger.Info("I_TEST", "symbols", symbols)
 	for _, s := range symbols {
 		funcsMap[s.Symbol] = nil
 	}
 
 	for _, s := range symbols {
+		m.logger.Info("I_TEST", "s", s)
 		for _, d := range s.DependsOn {
+			m.logger.Info("I_TEST", "d", d)
 			if _, exists := funcsMap[d]; !exists {
 				return fmt.Errorf("library %s has declared a dependent function %s for probe %s which does not exist, aborting", id, d, s.Symbol)
 			}
@@ -91,8 +92,9 @@ func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionS
 }
 
 func (m *Manager) registerProbe(p probe.Probe) error {
-	logger.Info("I_TEST", "probe", p)
+	m.logger.Info("I_TEST", "probe", p)
 	id := p.Manifest().Id
+	m.logger.Info("I_TEST", "p.Manifest().Id", id)
 	if _, exists := m.probes[id]; exists {
 		return fmt.Errorf("library %s registered twice, aborting", id)
 	}
@@ -194,6 +196,7 @@ func (m *Manager) load(target *process.TargetDetails) error {
 	if err != nil {
 		return err
 	}
+	m.logger.Info("I_TEST", "exe", exe)
 
 	if err := m.mount(target); err != nil {
 		return err
@@ -251,7 +254,7 @@ func (m *Manager) registerProbes() error {
 		kafkaProducer.New(m.logger),
 		kafkaConsumer.New(m.logger),
 	}
-	logger.Info("registerProbes", "insts.probe", insts)
+	m.logger.Info("registerProbes", "insts.probe", insts)
 	if m.globalImpl {
 		insts = append(insts, otelTraceGlobal.New(m.logger))
 	}

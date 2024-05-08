@@ -15,13 +15,13 @@
 package server
 
 import (
+	"github.com/siddontang/go-log/log"
 	"os"
 	"strings"
 
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/go-version"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
@@ -142,21 +142,26 @@ func (c patternPathSupportedConst) InjectOption(td *process.TargetDetails) (inje
 
 func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetDetails, obj *bpfObjects) ([]link.Link, error) {
 	offset, err := target.GetFunctionOffset(name)
+	log.Info("I_TEST", "name", name, "offset", offset)
 	if err != nil {
 		return nil, err
 	}
 
 	opts := &link.UprobeOptions{Address: offset, PID: target.PID}
+	log.Info("I_TEST", "opts", opts)
+
 	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts)
 	if err != nil {
 		return nil, err
 	}
+	log.Info("I_TEST", "l", l)
 	links := []link.Link{l}
 
 	retOffsets, err := target.GetFunctionReturns(name)
 	if err != nil {
 		return nil, err
 	}
+	log.Info("I_TEST", "retOffsets", retOffsets)
 
 	for _, ret := range retOffsets {
 		opts := &link.UprobeOptions{Address: ret}

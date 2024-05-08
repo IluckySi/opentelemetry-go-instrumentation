@@ -103,7 +103,7 @@ func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetD
 	if err != nil {
 		return err
 	}
-	i.Logger.Info("I_TEST", "spec", spec)
+	// i.Logger.Info("I_TEST", "spec", spec)  TODO: 核心
 
 	err = i.injectConsts(td, spec) // TODO:
 	if err != nil {

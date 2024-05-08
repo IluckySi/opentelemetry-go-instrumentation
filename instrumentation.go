@@ -95,8 +95,8 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	// can expose it in an option.
 	logger := newLogger()
 	logger = logger.WithName("Instrumentation")
-	logger.Info("I_TEST", "context.Context", ctx)
-	logger.Info("I_TEST", "InstrumentationOption", opts)
+	logger.Info("I_TEST", "context.Context", ctx)        // "context.Context":"context.Background.WithCancel"
+	logger.Info("I_TEST", "InstrumentationOption", opts) // "InstrumentationOptionError":"json: unsupported type: auto.fnOpt"
 
 	c, err := newInstConfig(ctx, opts)
 	if err != nil {
@@ -105,13 +105,13 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "instConfig", c)
+	logger.Info("I_TEST", "instConfig", c) // "instConfig":{}
 
 	pa := process.NewAnalyzer(logger)
-	logger.Info("I_TEST", "pa", c)
+	logger.Info("I_TEST", "pa", c) // "pa":{}
 
 	pid, err := pa.DiscoverProcessID(ctx, &c.target)
-	logger.Info("I_TEST", "pid", pid)
+	logger.Info("I_TEST", "pid", pid) // "pid":76102
 	if err != nil {
 		return nil, err
 	}

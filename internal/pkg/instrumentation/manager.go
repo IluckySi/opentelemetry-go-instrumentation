@@ -73,13 +73,13 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionSymbol) error {
 	// Validate that dependent probes point to real standalone probes.
 	funcsMap := make(map[string]interface{})
-	m.logger.Info("I_TEST", "symbols", symbols)
+	m.logger.Info("I_TEST", "symbols", symbols) // "symbols":[{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}]
 	for _, s := range symbols {
 		funcsMap[s.Symbol] = nil
 	}
 
 	for _, s := range symbols {
-		m.logger.Info("I_TEST", "s", s)
+		m.logger.Info("I_TEST", "s", s) // "s":{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}
 		for _, d := range s.DependsOn {
 			m.logger.Info("I_TEST", "d", d)
 			if _, exists := funcsMap[d]; !exists {
@@ -92,9 +92,9 @@ func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionS
 }
 
 func (m *Manager) registerProbe(p probe.Probe) error {
-	m.logger.Info("I_TEST", "probe", p)
+	m.logger.Info("I_TEST", "probe", p) // 以httpserver为例: "probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
 	id := p.Manifest().Id
-	m.logger.Info("I_TEST", "p.Manifest().Id", id)
+	m.logger.Info("I_TEST", "p.Manifest().Id", id) // "p.Manifest().Id":"net/http/server"
 	if _, exists := m.probes[id]; exists {
 		return fmt.Errorf("library %s registered twice, aborting", id)
 	}
@@ -246,15 +246,16 @@ func (m *Manager) Close() error {
 
 func (m *Manager) registerProbes() error {
 	insts := []probe.Probe{
-		grpcClient.New(m.logger),
-		grpcServer.New(m.logger),
+		// TODO: 调试，先只保留httpserver和httpclient
+		//grpcClient.New(m.logger),
+		//grpcServer.New(m.logger),
 		httpServer.New(m.logger),
 		httpClient.New(m.logger),
-		dbSql.New(m.logger),
-		kafkaProducer.New(m.logger),
-		kafkaConsumer.New(m.logger),
+		//dbSql.New(m.logger),
+		//kafkaProducer.New(m.logger),
+		//kafkaConsumer.New(m.logger),
 	}
-	m.logger.Info("registerProbes", "insts.probe", insts)
+	m.logger.Info("registerProbes", "insts.probe", insts) // "insts.probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client.bpfObjects]"
 	if m.globalImpl {
 		insts = append(insts, otelTraceGlobal.New(m.logger))
 	}

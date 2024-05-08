@@ -123,7 +123,7 @@ func (a *Analyzer) SetBuildInfo(pid int) error {
 	if err != nil {
 		return err
 	}
-	a.logger.Info("I_TEST", "f.name", f.Name(), "f.stat", f.Stat())
+	a.logger.Info("I_TEST", "f.name", f.Name())
 
 	defer f.Close()
 	bi, err := buildinfo.Read(f) // TODO: Read returns build information embedded in a Go binary file

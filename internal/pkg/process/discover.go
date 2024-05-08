@@ -96,7 +96,7 @@ func (a *Analyzer) DiscoverProcessID(ctx context.Context, target *TargetArgs) (i
 
 func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error) {
 	for {
-		dirs, err := proc.Readdir(15) // TODO: 打印的日志有点奇怪??????
+		dirs, err := proc.Readdir(15)
 		if err == io.EOF {
 			break
 		}

@@ -54,6 +54,7 @@ func NewAnalyzer(logger logr.Logger) *Analyzer {
 // DiscoverProcessID searches for the target as an actively running process,
 // returning its PID if found.
 func (a *Analyzer) DiscoverProcessID(ctx context.Context, target *TargetArgs) (int, error) {
+	a.logger.Info("I_TEST", "target.execpath", target.ExePath, "pid", target.Pid)
 	t := time.NewTicker(2 * time.Second)
 	defer t.Stop()
 
@@ -99,15 +100,16 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 		if err == io.EOF {
 			break
 		}
+		a.logger.Info("I_TEST", "dir", dirs)
 		if err != nil {
 			return 0, err
 		}
 
-		for _, di := range dirs {
+		for _, di := range dirs { // TODO: 找到对应的进程
 			if !di.IsDir() {
 				continue
 			}
-
+			a.logger.Info("I_TEST", "di", di, "di.Name", di.Name())
 			dname := di.Name()
 			if dname[0] < '0' || dname[0] > '9' {
 				continue
@@ -119,6 +121,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 			}
 
 			exeName, err := os.Readlink(path.Join("/proc", dname, "exe"))
+			a.logger.Info("I_TEST", "exeName", exeName)
 			if err != nil {
 				// Read link may fail if target process runs not as root
 				cmdLine, err := os.ReadFile(path.Join("/proc", dname, "cmdline"))
@@ -126,6 +129,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 					return 0, err
 				}
 
+				a.logger.Info("I_TEST", "cmdline", cmdLine, "contains", strings.Contains(string(cmdLine), target.ExePath))
 				if strings.Contains(string(cmdLine), target.ExePath) {
 					return pid, nil
 				}

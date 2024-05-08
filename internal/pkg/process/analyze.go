@@ -123,13 +123,15 @@ func (a *Analyzer) SetBuildInfo(pid int) error {
 	if err != nil {
 		return err
 	}
+	a.logger.Info("I_TEST", "f.name", f.Name(), "f.stat", f.Stat())
 
 	defer f.Close()
-	bi, err := buildinfo.Read(f)
+	bi, err := buildinfo.Read(f) // TODO: Read returns build information embedded in a Go binary file
 	if err != nil {
 		return err
 	}
 	a.logger.Info("I_TEST", "buildinfo", bi) // "buildinfo":"go\tgo1.21.1\npath\tcommand-line-arguments\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tCGO_ENABLED=1\nbuild\tCGO_CFLAGS=\nbuild\tCGO_CPPFLAGS=\nbuild\tCGO_CXXFLAGS=\nbuild\tCGO_LDFLAGS=\nbuild\tGOARCH=amd64\nbuild\tGOOS=linux\nbuild\tGOAMD64=v1\n"
+
 	bi.GoVersion = parseGoVersion(bi.GoVersion)
 	a.logger.Info("I_TEST", "GoVersion", bi.GoVersion) // "GoVersion":"1.21.1"
 

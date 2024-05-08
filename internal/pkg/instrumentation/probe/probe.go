@@ -86,31 +86,35 @@ type Base[BPFObj any, BPFEvent any] struct {
 // Manifest returns the Probe's instrumentation Manifest.
 func (i *Base[BPFObj, BPFEvent]) Manifest() Manifest {
 	structfields := consts(i.Consts).structFields()
+	i.Logger.Info("I_TEST", "structfields", structfields)
 
 	symbols := make([]FunctionSymbol, 0, len(i.Uprobes))
 	for _, up := range i.Uprobes {
 		symbols = append(symbols, FunctionSymbol{Symbol: up.Sym, DependsOn: up.DependsOn})
 	}
+	i.Logger.Info("I_TEST", "symbols", symbols)
 
 	return NewManifest(i.ID, structfields, symbols)
 }
 
-// Load loads all instrumentation offsets.
+// Load loads all instrumentation offsets. // TODO: 加载所有instrumentation offsets.
 func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetDetails) error {
 	spec, err := i.SpecFn()
 	if err != nil {
 		return err
 	}
+	i.Logger.Info("I_TEST", "spec", spec)
 
-	err = i.injectConsts(td, spec)
+	err = i.injectConsts(td, spec) // TODO:
 	if err != nil {
 		return err
 	}
 
-	obj, err := i.buildObj(exec, td, spec)
+	obj, err := i.buildObj(exec, td, spec) // TODO:
 	if err != nil {
 		return err
 	}
+	i.Logger.Info("I_TEST", "obj", spec)
 
 	i.reader, err = i.ReaderFn(*obj)
 	if err != nil {
@@ -146,7 +150,7 @@ func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.Tar
 	}
 
 	for _, up := range i.Uprobes {
-		links, err := up.Fn(up.Sym, exec, td, obj)
+		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: attach行为吗?
 		if err != nil {
 			if up.Optional {
 				i.Logger.Info("failed to attach optional uprobe", "probe", i.ID, "symbol", up.Sym, "error", err)

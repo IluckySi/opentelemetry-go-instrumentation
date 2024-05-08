@@ -48,7 +48,7 @@ func Allocate(logger logr.Logger, pid int) (*AllocationDetails, error) {
 	}
 
 	mapSize := uint64(os.Getpagesize() * nCPU * 8)
-	logger.Info(
+	logger.Info( // {"level":"info","ts":1715153507.2743533,"logger":"Instrumentation.Allocate","caller":"process/allocate.go:51","msg":"Requesting memory allocation","size":262144,"page size":4096,"cpu count":8}
 		"Requesting memory allocation",
 		"size", mapSize,
 		"page size", os.Getpagesize(),

@@ -135,7 +135,7 @@ func NewTracedProgram(pid int, logger logr.Logger) (*TracedProgram, error) {
 				return nil, errors.WithStack(err)
 			}
 
-			logger.Info("attach successfully", "tid", tid)
+			logger.Info("attach successfully", "tid", tid) // {"level":"info","ts":1715153507.274925,"logger":"Instrumentation.Allocate.TracedProgram","caller":"ptrace/ptrace_linux.go:138","msg":"attach successfully","tid":135509}
 			tids[tid] = true
 			tidMap[tid] = true
 		}

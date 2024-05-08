@@ -62,7 +62,7 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 		closingErrors:  make(chan error, 1),
 	}
 
-	err := m.registerProbes()
+	err := m.registerProbes() // TODO: 注册probe
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (m *Manager) registerProbe(p probe.Probe) error {
 
 	if err := m.validateProbeDependents(id, p.Manifest().Symbols); err != nil {
 		return err
-	}
+	} // TODO:PR:id.Symbos
 
 	m.probes[id] = p
 	return nil
@@ -153,7 +153,7 @@ func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error 
 		return err
 	}
 
-	err := m.load(target)
+	err := m.load(target) // TODO: 核心方法
 	if err != nil {
 		close(m.closingErrors)
 		return err
@@ -187,7 +187,7 @@ func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error 
 }
 
 func (m *Manager) load(target *process.TargetDetails) error {
-	// Allow the current process to lock memory for eBPF resources.
+	// Allow the current process to lock memory for eBPF resources.  // TODO: lock memory是什么行为?
 	if err := rlimit.RemoveMemlock(); err != nil {
 		return err
 	}
@@ -196,23 +196,23 @@ func (m *Manager) load(target *process.TargetDetails) error {
 	if err != nil {
 		return err
 	}
-	m.logger.Info("I_TEST", "exe", exe)
+	m.logger.Info("I_TEST", "exe", exe) // "exe":{}
 
 	if err := m.mount(target); err != nil {
 		return err
-	}
+	} // TODO: 这是什么行为呢? 挂载目录?
 
 	// Load probes
 	for name, i := range m.probes {
-		m.logger.Info("loading probe", "name", name)
-		err := i.Load(exe, target)
+		m.logger.Info("loading probe", "probe", i, "name", name) // "name":"net/http/server"/"name":"net/http/client"
+		err := i.Load(exe, target)                               // TODO: 核心方法
 		if err != nil {
 			m.logger.Error(err, "error while loading probes, cleaning up", "name", name)
 			return errors.Join(err, m.cleanup(target))
 		}
 	}
 
-	m.logger.Info("loaded probes to memory", "total_probes", len(m.probes))
+	m.logger.Info("loaded probes to memory", "total_probes", len(m.probes)) // {"level":"info","ts":1715153507.7838812,"logger":"Instrumentation.Manager","caller":"instrumentation/manager.go:215","msg":"loaded probes to memory","total_probes":2}
 	return nil
 }
 
@@ -255,13 +255,14 @@ func (m *Manager) registerProbes() error {
 		//kafkaProducer.New(m.logger),
 		//kafkaConsumer.New(m.logger),
 	}
-	m.logger.Info("registerProbes", "insts.probe", insts) // "insts.probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client.bpfObjects]"
+	m.logger.Info("I_TEST", "insts.probe", insts) // "insts.probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client.bpfObjects]"
 	if m.globalImpl {
 		insts = append(insts, otelTraceGlobal.New(m.logger))
 	}
 
 	for _, i := range insts {
-		err := m.registerProbe(i)
+		m.logger.Info("I_TEST", "i", i)
+		err := m.registerProbe(i) // TODO: 注册Probe
 		if err != nil {
 			return err
 		}

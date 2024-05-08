@@ -57,7 +57,7 @@ func New(logger logr.Logger) probe.Probe {
 			Fn:  uprobeRoundTrip,
 		},
 	}
-
+	// TODO: 是否支持context上下文传递
 	// If the kernel supports context propagation, we enable the
 	// probe which writes the data in the outgoing buffer.
 	if utils.SupportsContextPropagation() {

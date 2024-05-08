@@ -45,6 +45,7 @@ const (
 
 // New returns a new [probe.Probe].
 func New(logger logr.Logger) probe.Probe {
+	log.Info("I_TEST", "New", "HTTPServer")
 	id := probe.ID{
 		SpanKind:        trace.SpanKindServer,
 		InstrumentedPkg: pkg,
@@ -124,8 +125,8 @@ func New(logger logr.Logger) probe.Probe {
 		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) {
 			return perf.NewReader(obj.Events, os.Getpagesize())
 		},
-		SpecFn:    loadBpf,
-		ProcessFn: convertEvent,
+		SpecFn:    loadBpf,      // TODO: 加载BPF
+		ProcessFn: convertEvent, // TODO: 转换事件
 	}
 }
 
@@ -166,7 +167,10 @@ func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetD
 
 	for _, ret := range retOffsets {
 		opts := &link.UprobeOptions{Address: ret}
+		log.Info("I_TEST", "opts", opts)
+
 		l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP_Returns, opts)
+		log.Info("I_TEST", "l", l)
 		if err != nil {
 			return nil, err
 		}
@@ -190,6 +194,7 @@ type event struct {
 }
 
 func convertEvent(e *event) []*probe.SpanEvent {
+	log.Info("I_TEST", "convertEvent", e)
 	path := unix.ByteSliceToString(e.Path[:])
 	method := unix.ByteSliceToString(e.Method[:])
 	patternPath := unix.ByteSliceToString(e.PathPattern[:])

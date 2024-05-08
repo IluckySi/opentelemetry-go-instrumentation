@@ -95,8 +95,8 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	// can expose it in an option.
 	logger := newLogger()
 	logger = logger.WithName("Instrumentation")
-	logger.Info("I_TEST", "context.Context", ctx)        // "context.Context":"context.Background.WithCancel"
-	logger.Info("I_TEST", "InstrumentationOption", opts) // "InstrumentationOptionError":"json: unsupported type: auto.fnOpt"
+	logger.Info("I_TEST", "context.Context", ctx)        // --"context.Context":"context.Background.WithCancel"
+	logger.Info("I_TEST", "InstrumentationOption", opts) // --"InstrumentationOptionError":"json: unsupported type: auto.fnOpt"
 
 	c, err := newInstConfig(ctx, opts)
 	if err != nil {
@@ -105,18 +105,20 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "instConfig", c) // "instConfig":{}
+	logger.Info("I_TEST", "instConfig", c) // --"instConfig":{}
+	logger.Info("I_TEST", "instConfig.target", c.target)
+	logger.Info("I_TEST", "instConfig.serviceName", c.serviceName)
 
-	pa := process.NewAnalyzer(logger)
-	logger.Info("I_TEST", "pa", c) // "pa":{}
+	pa := process.NewAnalyzer(logger) // TODO: 方法在discovery.go里面
+	logger.Info("I_TEST", "pa", c)    // --"pa":{}
 
-	pid, err := pa.DiscoverProcessID(ctx, &c.target)
-	logger.Info("I_TEST", "pid", pid) // "pid":76102
+	pid, err := pa.DiscoverProcessID(ctx, &c.target) // TODO: 根据可执行文件路径获取进程id
+	logger.Info("I_TEST", "pid", pid)                // --"pid":76102
 	if err != nil {
 		return nil, err
 	}
 
-	err = pa.SetBuildInfo(pid)
+	err = pa.SetBuildInfo(pid) // TODO: 从go二进制文件中获取构建信息
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +137,7 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "td", td)
+	logger.Info("I_TEST", "td", td) // "td":{"PID":76102,"Functions":[{"Name":"net/http.Header.writeSubset","Offset":2186720,"ReturnOffsets":[2187179,2188307]},{"Name":"net/http.serverHandler.ServeHTTP","Offset":2248992,"ReturnOffsets":[2249139]},{"Name":"net/http.(*Transport).roundTrip","Offset":2290912,"ReturnOffsets":[2291381,2291457,2291930,2292155,2292241,2292409,2292420,2293152,2293317,2293390,2293478,2293549,2293609,2294029,2294231]}],"GoVersion":"1.21.1","Libraries":{"std":"1.21.1"},"AllocationDetails":null}
 
 	allocDetails, err := process.Allocate(logger, pid)
 	if err != nil {

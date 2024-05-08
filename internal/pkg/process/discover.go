@@ -106,7 +106,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 		}
 
 		for _, di := range dirs { // TODO: 找到对应的进程
-			a.logger.Info("I_TEST", "di", di, "di.Name", di.Name()) // --"di.Name":"fs"
+			// a.logger.Info("I_TEST", "di", di, "di.Name", di.Name()) // --"di.Name":"fs"
 			if !di.IsDir() {
 				continue
 			}
@@ -121,7 +121,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 			}
 
 			exeName, err := os.Readlink(path.Join("/proc", dname, "exe"))
-			a.logger.Info("I_TEST", "pid", pid, "exeName", exeName)
+			// a.logger.Info("I_TEST", "pid", pid, "exeName", exeName)
 			if err != nil {
 				// Read link may fail if target process runs not as root
 				cmdLine, err := os.ReadFile(path.Join("/proc", dname, "cmdline"))
@@ -129,7 +129,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 					return 0, err
 				}
 
-				a.logger.Info("I_TEST", "cmdline", cmdLine, "contains", strings.Contains(string(cmdLine), target.ExePath))
+				// a.logger.Info("I_TEST", "cmdline", cmdLine, "contains", strings.Contains(string(cmdLine), target.ExePath))
 				if strings.Contains(string(cmdLine), target.ExePath) {
 					return pid, nil
 				}

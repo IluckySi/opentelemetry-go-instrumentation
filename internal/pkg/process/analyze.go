@@ -19,10 +19,9 @@ import (
 	"debug/elf"
 	"errors"
 	"fmt"
+	"github.com/alibaba/ilogtail/pkg/logger"
 	"os"
 	"strings"
-
-	"github.com/hashicorp/go-version"
 
 	"go.opentelemetry.io/auto/internal/pkg/process/binary"
 )
@@ -81,11 +80,14 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("I_TEST"，"elfF"， elfF)
 
 	goVersion, err := version.NewVersion(a.BuildInfo.GoVersion)
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("I_TEST"，"GoVersion"， goVersion)
+
 	result.GoVersion = goVersion
 	result.Libraries = make(map[string]*version.Version, len(a.BuildInfo.Deps)+1)
 	for _, dep := range a.BuildInfo.Deps {
@@ -98,6 +100,7 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	}
 	result.Libraries["std"] = goVersion
 
+	logger.Info("I_TEST"，"relevantFuncs"， relevantFuncs)
 	funcs, err := a.findFunctions(elfF, relevantFuncs)
 	if err != nil {
 		return nil, err
@@ -125,10 +128,12 @@ func (a *Analyzer) SetBuildInfo(pid int) error {
 	if err != nil {
 		return err
 	}
-
+	a.logger.info("I_TEST", "buildinfo", bi)
 	bi.GoVersion = parseGoVersion(bi.GoVersion)
+	a.logger.info("I_TEST", "GoVersion", bi.GoVersion)
 
 	a.BuildInfo = bi
+	a.logger.info("I_TEST", "a.BuildInfo", a.BuildInfo)
 	return nil
 }
 

@@ -18,11 +18,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
-
+	"github.com/alibaba/ilogtail/pkg/logger"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
 	"github.com/go-logr/logr"
+	"sync"
 
 	dbSql "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/database/sql"
 	kafkaConsumer "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/github.com/segmentio/kafka-go/consumer"
@@ -74,6 +74,7 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionSymbol) error {
 	// Validate that dependent probes point to real standalone probes.
 	funcsMap := make(map[string]interface{})
+	logger.Info("I_TEST", "symbols", symbols)
 	for _, s := range symbols {
 		funcsMap[s.Symbol] = nil
 	}
@@ -90,6 +91,7 @@ func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionS
 }
 
 func (m *Manager) registerProbe(p probe.Probe) error {
+	logger.Info("I_TEST", "probe", p)
 	id := p.Manifest().Id
 	if _, exists := m.probes[id]; exists {
 		return fmt.Errorf("library %s registered twice, aborting", id)
@@ -249,7 +251,7 @@ func (m *Manager) registerProbes() error {
 		kafkaProducer.New(m.logger),
 		kafkaConsumer.New(m.logger),
 	}
-
+	logger.Info("registerProbes", "insts.probe", insts)
 	if m.globalImpl {
 		insts = append(insts, otelTraceGlobal.New(m.logger))
 	}

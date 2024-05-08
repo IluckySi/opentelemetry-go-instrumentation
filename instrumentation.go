@@ -95,6 +95,8 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	// can expose it in an option.
 	logger := newLogger()
 	logger = logger.WithName("Instrumentation")
+	logger.Info("I_TEST", "context.Context", ctx)
+	logger.Info("I_TEST", "InstrumentationOption", ops)
 
 	c, err := newInstConfig(ctx, opts)
 	if err != nil {

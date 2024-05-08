@@ -76,7 +76,7 @@ func FindFunctionsStripped(elfF *elf.File, relevantFuncs map[string]interface{})
 }
 
 func findFuncOffsetStripped(f *gosym.Func, elfF *elf.File) (uint64, []uint64, error) {
-	logger.Info("I_TEST", "Func", func, "elfF", function)
+	logger.Info("I_TEST", "Func", func, "elfF", f)
 	for _, prog := range elfF.Progs {
 		if prog.Type != elf.PT_LOAD || (prog.Flags&elf.PF_X) == 0 {
 			continue

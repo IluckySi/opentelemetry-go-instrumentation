@@ -105,9 +105,9 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "instConfig", c) // --"instConfig":{}
-	logger.Info("I_TEST", "instConfig.target", c.target)
-	logger.Info("I_TEST", "instConfig.serviceName", c.serviceName)
+	logger.Info("I_TEST", "instConfig", c)                         // --"instConfig":{}
+	logger.Info("I_TEST", "instConfig.target", c.target)           // --"instConfig.target":{"ExePath":"/data/ilucky/otel/go_http_demo","Pid":0}
+	logger.Info("I_TEST", "instConfig.serviceName", c.serviceName) // --"instConfig.serviceName":"i_go_http_demo"
 
 	pa := process.NewAnalyzer(logger) // TODO: 方法在discovery.go里面
 	logger.Info("I_TEST", "pa", c)    // --"pa":{}
@@ -118,7 +118,7 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 		return nil, err
 	}
 
-	err = pa.SetBuildInfo(pid) // TODO: 从go二进制文件中获取构建信息
+	err = pa.SetBuildInfo(pid)
 	if err != nil {
 		return nil, err
 	}

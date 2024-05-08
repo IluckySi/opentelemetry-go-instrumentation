@@ -54,7 +54,7 @@ func NewAnalyzer(logger logr.Logger) *Analyzer {
 // DiscoverProcessID searches for the target as an actively running process,
 // returning its PID if found.
 func (a *Analyzer) DiscoverProcessID(ctx context.Context, target *TargetArgs) (int, error) {
-	a.logger.Info("I_TEST", "target.execpath", target.ExePath, "pid", target.Pid)
+	a.logger.Info("I_TEST", "target.execpath", target.ExePath, "pid", target.Pid) // --"target.execpath":"/data/ilucky/otel/go_http_demo","pid":0
 	t := time.NewTicker(2 * time.Second)
 	defer t.Stop()
 
@@ -96,22 +96,22 @@ func (a *Analyzer) DiscoverProcessID(ctx context.Context, target *TargetArgs) (i
 
 func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error) {
 	for {
-		dirs, err := proc.Readdir(15)
+		dirs, err := proc.Readdir(15) // TODO: 打印的日志有点奇怪??????
 		if err == io.EOF {
 			break
 		}
-		a.logger.Info("I_TEST", "dir", dirs)
+		a.logger.Info("I_TEST", "dir", dirs) // --"dir":[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
 		if err != nil {
 			return 0, err
 		}
 
 		for _, di := range dirs { // TODO: 找到对应的进程
+			a.logger.Info("I_TEST", "di", di, "di.Name", di.Name()) // --"di.Name":"fs"
 			if !di.IsDir() {
 				continue
 			}
-			a.logger.Info("I_TEST", "di", di, "di.Name", di.Name())
 			dname := di.Name()
-			if dname[0] < '0' || dname[0] > '9' {
+			if dname[0] < '0' || dname[0] > '9' { // TODO: 判断第一个字符非数字
 				continue
 			}
 
@@ -121,7 +121,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 			}
 
 			exeName, err := os.Readlink(path.Join("/proc", dname, "exe"))
-			a.logger.Info("I_TEST", "exeName", exeName)
+			a.logger.Info("I_TEST", "pid", pid, "exeName", exeName)
 			if err != nil {
 				// Read link may fail if target process runs not as root
 				cmdLine, err := os.ReadFile(path.Join("/proc", dname, "cmdline"))

@@ -19,11 +19,12 @@ import (
 	"debug/elf"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/auto/internal/pkg/process/binary"
 	"os"
 	"strings"
 
 	"github.com/hashicorp/go-version"
+
+	"go.opentelemetry.io/auto/internal/pkg/process/binary"
 )
 
 // TargetDetails are the details about a target function.

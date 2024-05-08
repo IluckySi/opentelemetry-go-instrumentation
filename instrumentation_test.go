@@ -31,7 +31,7 @@ func TestWithServiceName(t *testing.T) {
 	testServiceName := "test_serviceName"
 
 	// Use WithServiceName to config the service name
-	c, err := newInstConfig(ctx, []InstrumentationOption{WithServiceName((testServiceName))})
+	c, err := newInstConfig(ctx, []InstrumentationOption{WithServiceName(testServiceName)})
 	require.NoError(t, err)
 	assert.Equal(t, testServiceName, c.serviceName)
 

@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"time"
 
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )

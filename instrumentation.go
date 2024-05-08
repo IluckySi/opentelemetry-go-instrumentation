@@ -103,9 +103,13 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
+	logger.Info("I_TEST", "instConfig", c)
 
 	pa := process.NewAnalyzer(logger)
+	logger.Info("I_TEST", "pa", c)
+
 	pid, err := pa.DiscoverProcessID(ctx, &c.target)
+	logger.Info("I_TEST", "pid", pid)
 	if err != nil {
 		return nil, err
 	}
@@ -129,11 +133,13 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("I_TEST", "td", td)
 
 	allocDetails, err := process.Allocate(logger, pid)
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("I_TEST", "allocDetails", allocDetails)
 	td.AllocationDetails = allocDetails
 
 	logger.Info(

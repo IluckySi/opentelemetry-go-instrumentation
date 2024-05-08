@@ -26,6 +26,7 @@ require (
 	github.com/go-logr/zapr v1.3.0
 	github.com/hashicorp/go-version v1.6.0
 	github.com/pkg/errors v0.9.1
+	github.com/siddontang/go-log v0.0.0-20190221022429-1e957dd83bed
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.51.0
 	go.opentelemetry.io/otel v1.26.0

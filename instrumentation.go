@@ -96,7 +96,7 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	logger := newLogger()
 	logger = logger.WithName("Instrumentation")
 	logger.Info("I_TEST", "context.Context", ctx)
-	logger.Info("I_TEST", "InstrumentationOption", ops)
+	logger.Info("I_TEST", "InstrumentationOption", opts)
 
 	c, err := newInstConfig(ctx, opts)
 	if err != nil {

@@ -202,6 +202,7 @@ func convertEvent(e *event) []*probe.SpanEvent {
 	path := unix.ByteSliceToString(e.Path[:])
 	method := unix.ByteSliceToString(e.Method[:])
 	patternPath := unix.ByteSliceToString(e.PathPattern[:])
+	log.Info("I_TEST", "path", path, "method", method, "patternPath", patternPath)
 
 	isValidPatternPath := true
 	patternPath, err := http.ParsePattern(patternPath)

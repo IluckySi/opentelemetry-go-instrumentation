@@ -19,6 +19,7 @@ import (
 	"debug/elf"
 	"errors"
 	"fmt"
+	"github.com/siddontang/go-log/log"
 	"os"
 	"strings"
 
@@ -101,13 +102,20 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	}
 	result.Libraries["std"] = goVersion
 
-	a.logger.Info("I_TEST", "relevantFuncs", relevantFuncs)
-	funcs, err := a.findFunctions(elfF, relevantFuncs)
+	a.logger.Info("I_TEST", "relevantFuncs", relevantFuncs) // level":"info","ts":1715220803.3490589,"logger":"Instrumentation.Analyzer","caller":"process/analyze.go:104","msg":"I_TEST","relevantFuncs":{"net/http.(*Transport).roundTrip":null,"net/http.Header.writeSubset":null,"net/http.serverHandler.ServeHTTP":null}}
+	funcs, err := a.findFunctions(elfF, relevantFuncs)      // TODO: 核心方法, 从二进制elf文件中找到方法的offset, 这些offset是如何使用的？
 	if err != nil {
 		return nil, err
 	}
 	for _, fn := range funcs {
-		a.logger.Info("found function", "function_name", fn)
+		//root@ubuntu22:/data/ilucky/otel# objdump -t  go_http_demo|grep "net/http.serverHandler.ServeHTTP"
+		//0000000000625120 g     F .text	00000000000000c6              net/http.serverHandler.ServeHTTP
+		// 2248992 -> 16进制是225120
+		// 2290912 -> 16进制是22f4e0
+		//root@ubuntu22:/data/ilucky/otel# objdump -t  go_http_demo|grep "2f4e0"
+		//000000000062f4e0 g     F .text	0000000000000d25              net/http.(*Transport).roundTrip
+		//root@ubuntu22:/data/ilucky/otel#
+		a.logger.Info("found function", "function_name", fn) // "function_name":{"Name":"net/http.Header.writeSubset","Offset":2186720,"ReturnOffsets":[2187179,2188307]} | "function_name":{"Name":"net/http.serverHandler.ServeHTTP","Offset":2248992,"ReturnOffsets":[2249139]} | function_name":{"Name":"net/http.(*Transport).roundTrip","Offset":2290912,"ReturnOffsets":[2291381,2291457,2291930,2292155,2292241,2292409,2292420,2293152,2293317,2293390,2293478,2293549,2293609,2294029,2294231]}
 	}
 
 	result.Functions = funcs
@@ -151,10 +159,11 @@ func parseGoVersion(vers string) string {
 
 func (a *Analyzer) findFunctions(elfF *elf.File, relevantFuncs map[string]interface{}) ([]*binary.Func, error) {
 	result, err := binary.FindFunctionsUnStripped(elfF, relevantFuncs)
+	log.Info("I_TEST", "result", result)
 	if err != nil {
 		if errors.Is(err, elf.ErrNoSymbols) {
 			a.logger.Info("No symbols found in binary, trying to find functions using .gosymtab")
-			return binary.FindFunctionsStripped(elfF, relevantFuncs)
+			return binary.FindFunctionsStripped(elfF, relevantFuncs) // TODO: PR: return result
 		}
 		return nil, err
 	}

@@ -107,7 +107,7 @@ func NewTracedProgram(pid int, logger logr.Logger) (*TracedProgram, error) {
 			}
 			subset = false
 
-			err = syscall.PtraceAttach(tid)
+			err = syscall.PtraceAttach(tid) // TODO: 核心方法, 将调试器附加到另一个进程...为什么还要做这一步呢? 基于EBPF?
 			if err != nil {
 				_, ok := retryCount[tid]
 				if !ok {

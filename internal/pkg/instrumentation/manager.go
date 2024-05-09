@@ -101,7 +101,7 @@ func (m *Manager) registerProbe(p probe.Probe) error {
 
 	if err := m.validateProbeDependents(id, p.Manifest().Symbols); err != nil {
 		return err
-	} // TODO:PR:id.Symbos
+	} // TODO:PR:id.Symbols
 
 	m.probes[id] = p
 	return nil
@@ -109,6 +109,7 @@ func (m *Manager) registerProbe(p probe.Probe) error {
 
 // GetRelevantFuncs returns the instrumented functions for all managed probes.
 func (m *Manager) GetRelevantFuncs() map[string]interface{} {
+	m.logger.Info("I_TEST", "GetRelevantFuncs")
 	funcsMap := make(map[string]interface{})
 	for _, i := range m.probes {
 		for _, s := range i.Manifest().Symbols {
@@ -201,11 +202,11 @@ func (m *Manager) load(target *process.TargetDetails) error {
 
 	if err := m.mount(target); err != nil {
 		return err
-	} // TODO: 这是什么行为呢? 挂载目录?
+	} // TODO: 这是什么行为呢? 挂载目录??????
 
 	// Load probes
 	for name, i := range m.probes {
-		m.logger.Info("loading probe", "probe", i, "name", name) // "name":"net/http/server"/"name":"net/http/client"
+		m.logger.Info("loading probe", "probe", i, "name", name) // {"level":"info","ts":1715220803.3591125,"logger":"Instrumentation.Manager","caller":"instrumentation/manager.go:208","msg":"loading probe","probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]","name":"net/http/server"}
 		err := i.Load(exe, target)                               // TODO: 核心方法
 		if err != nil {
 			m.logger.Error(err, "error while loading probes, cleaning up", "name", name)

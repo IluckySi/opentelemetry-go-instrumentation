@@ -117,6 +117,7 @@ func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetD
 	i.Logger.Info("I_TEST", "obj", spec)
 
 	i.reader, err = i.ReaderFn(*obj)
+	i.Logger.Info("I_TEST", "i.reader", i.reader)
 	if err != nil {
 		return err
 	}
@@ -144,13 +145,15 @@ func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.Tar
 			PinPath: bpffs.PathForTargetApplication(td),
 		},
 	}
-	err := utils.LoadEBPFObjects(spec, obj, sOpts)
+	err := utils.LoadEBPFObjects(spec, obj, sOpts) // TODO: ???
 	if err != nil {
 		return nil, err
 	}
-
+	i.Logger.Info("********************")
 	for _, up := range i.Uprobes {
-		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: attach行为吗?
+		i.Logger.Info("I_TEST", "up", up)
+		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: 核心方法: attach the eBPF program to the function.
+		i.Logger.Info("I_TEST", "links", links)
 		if err != nil {
 			if up.Optional {
 				i.Logger.Info("failed to attach optional uprobe", "probe", i.ID, "symbol", up.Sym, "error", err)
@@ -169,6 +172,7 @@ func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.Tar
 // Run runs the events processing loop.
 func (i *Base[BPFObj, BPFEvent]) Run(dest chan<- *Event) {
 	for {
+		i.Logger.Info("------------run----------------")
 		record, err := i.reader.Read()
 		if err != nil {
 			if errors.Is(err, perf.ErrClosed) {

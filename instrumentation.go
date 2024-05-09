@@ -133,13 +133,13 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 		return nil, err
 	}
 
-	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs()) // TODO: 解析二进制数据
+	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs()) // TODO: 解析二进制数据获取方法对应的offset
 	if err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "td", td) // "td":{"PID":76102,"Functions":[{"Name":"net/http.Header.writeSubset","Offset":2186720,"ReturnOffsets":[2187179,2188307]},{"Name":"net/http.serverHandler.ServeHTTP","Offset":2248992,"ReturnOffsets":[2249139]},{"Name":"net/http.(*Transport).roundTrip","Offset":2290912,"ReturnOffsets":[2291381,2291457,2291930,2292155,2292241,2292409,2292420,2293152,2293317,2293390,2293478,2293549,2293609,2294029,2294231]}],"GoVersion":"1.21.1","Libraries":{"std":"1.21.1"},"AllocationDetails":null}
+	logger.Info("I_TEST", "td", td) // 核心信息: "td":{"PID":76102,"Functions":[{"Name":"net/http.Header.writeSubset","Offset":2186720,"ReturnOffsets":[2187179,2188307]},{"Name":"net/http.serverHandler.ServeHTTP","Offset":2248992,"ReturnOffsets":[2249139]},{"Name":"net/http.(*Transport).roundTrip","Offset":2290912,"ReturnOffsets":[2291381,2291457,2291930,2292155,2292241,2292409,2292420,2293152,2293317,2293390,2293478,2293549,2293609,2294029,2294231]}],"GoVersion":"1.21.1","Libraries":{"std":"1.21.1"},"AllocationDetails":null}
 
-	allocDetails, err := process.Allocate(logger, pid)
+	allocDetails, err := process.Allocate(logger, pid) // TODO: 在allocate.go文件里面，allocates memory for the instrumented process.
 	if err != nil {
 		return nil, err
 	}

@@ -54,7 +54,7 @@ func Allocate(logger logr.Logger, pid int) (*AllocationDetails, error) {
 		"page size", os.Getpagesize(),
 		"cpu count", nCPU)
 
-	addr, err := remoteAllocate(logger, pid, mapSize)
+	addr, err := remoteAllocate(logger, pid, mapSize) // TODO: xxx
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func Allocate(logger logr.Logger, pid int) (*AllocationDetails, error) {
 func remoteAllocate(logger logr.Logger, pid int, mapSize uint64) (uint64, error) {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
-	program, err := ptrace.NewTracedProgram(pid, logger)
+	program, err := ptrace.NewTracedProgram(pid, logger) // TODO: 核心方法...
 	if err != nil {
 		return 0, err
 	}

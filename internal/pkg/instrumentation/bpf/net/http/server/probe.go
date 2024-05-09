@@ -144,7 +144,7 @@ func (c patternPathSupportedConst) InjectOption(td *process.TargetDetails) (inje
 
 func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetDetails, obj *bpfObjects) ([]link.Link, error) {
 	offset, err := target.GetFunctionOffset(name)
-	log.Info("I_TEST", "name", name, "offset", offset)
+	log.Info("I_TEST", "name", name, "offset", offset) // [2024/05/09 02:13:23] [info] probe.go:147 I_TESTnamenet/http.serverHandler.ServeHTTPoffset2248992
 	if err != nil {
 		return nil, err
 	}

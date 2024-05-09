@@ -113,13 +113,12 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	logger.Info("I_TEST", "pa", c)    // --"pa":{}
 
 	pid, err := pa.DiscoverProcessID(ctx, &c.target) // TODO: 根据可执行文件路径获取进程id
-	logger.Info("============I_TEST==============")
-	logger.Info("I_TEST", "pid", pid) // --"pid":76102
+	logger.Info("I_TEST", "pid", pid)                // --"pid":76102
 	if err != nil {
 		return nil, err
 	}
 
-	err = pa.SetBuildInfo(pid)
+	err = pa.SetBuildInfo(pid) // TODO: Read  build information embedded in a Go binary file
 	if err != nil {
 		return nil, err
 	}
@@ -129,13 +128,12 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 		return nil, err
 	}
 
-	logger.Info("============I_TEST_Manager==============")
-	mngr, err := instrumentation.NewManager(logger, ctrl, c.globalImpl)
+	mngr, err := instrumentation.NewManager(logger, ctrl, c.globalImpl) // TODO:
 	if err != nil {
 		return nil, err
 	}
 
-	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs())
+	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs()) // TODO: 解析二进制数据
 	if err != nil {
 		return nil, err
 	}

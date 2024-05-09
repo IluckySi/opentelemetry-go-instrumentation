@@ -86,13 +86,13 @@ type Base[BPFObj any, BPFEvent any] struct {
 // Manifest returns the Probe's instrumentation Manifest.
 func (i *Base[BPFObj, BPFEvent]) Manifest() Manifest {
 	structfields := consts(i.Consts).structFields()
-	i.Logger.Info("I_TEST", "structfields", structfields)
+	i.Logger.Info("I_TEST", "structfields", structfields) // {"level":"info","ts":1715174003.6266043,"logger":"Instrumentation.Manager.net/http/server","caller":"probe/probe.go:89","msg":"I_TEST","structfields":[{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"Method"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"URL"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"ctx"},{"ModPath":"std","PkgPath":"net/url","Struct":"URL","Field":"Path"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"Header"},{"ModPath":"std","PkgPath":"net/http","Struct":"response","Field":"req"},{"ModPath":"std","PkgPath":"net/http","Struct":"response","Field":"status"},{"ModPath":"std","PkgPath":"runtime","Struct":"hmap","Field":"buckets"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"RemoteAddr"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"Host"},{"ModPath":"std","PkgPath":"net/http","Struct":"Request","Field":"Proto"}]}
 
 	symbols := make([]FunctionSymbol, 0, len(i.Uprobes))
 	for _, up := range i.Uprobes {
 		symbols = append(symbols, FunctionSymbol{Symbol: up.Sym, DependsOn: up.DependsOn})
 	}
-	i.Logger.Info("I_TEST", "symbols", symbols)
+	i.Logger.Info("I_TEST", "symbols", symbols) // "symbols":[{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}
 
 	return NewManifest(i.ID, structfields, symbols)
 }

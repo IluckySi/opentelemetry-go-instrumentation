@@ -73,7 +73,7 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionSymbol) error {
 	// Validate that dependent probes point to real standalone probes.
 	funcsMap := make(map[string]interface{})
-	m.logger.Info("I_TEST", "symbols", symbols) // "symbols":[{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}]
+	m.logger.Info("I_TEST", "symbols", symbols) // server: "symbols":[{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}]  client: "symbols":[{"Symbol":"net/http.(*Transport).roundTrip","DependsOn":null},{"Symbol":"net/http.Header.writeSubset","DependsOn":["net/http.(*Transport).roundTrip"]}]
 	for _, s := range symbols {
 		funcsMap[s.Symbol] = nil
 	}
@@ -81,7 +81,7 @@ func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionS
 	for _, s := range symbols {
 		m.logger.Info("I_TEST", "s", s) // "s":{"Symbol":"net/http.serverHandler.ServeHTTP","DependsOn":null}
 		for _, d := range s.DependsOn {
-			m.logger.Info("I_TEST", "d", d)
+			m.logger.Info("I_TEST", "d", d) // "iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/client.bpfObjects]"
 			if _, exists := funcsMap[d]; !exists {
 				return fmt.Errorf("library %s has declared a dependent function %s for probe %s which does not exist, aborting", id, d, s.Symbol)
 			}
@@ -147,6 +147,7 @@ func (m *Manager) FilterUnusedProbes(target *process.TargetDetails) {
 
 // Run runs the event processing loop for all managed probes.
 func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error {
+	m.logger.Info("-------------------——Run--------------------")
 	if len(m.probes) == 0 {
 		err := errors.New("no instrumentation for target process")
 		close(m.closingErrors)
@@ -261,8 +262,8 @@ func (m *Manager) registerProbes() error {
 	}
 
 	for _, i := range insts {
-		m.logger.Info("I_TEST", "i", i)
-		err := m.registerProbe(i) // TODO: 注册Probe
+		m.logger.Info("I_TEST", "i", i) // {"level":"info","ts":1715173340.1835983,"logger":"Instrumentation.Manager","caller":"instrumentation/manager.go:264","msg":"I_TEST","iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
+		err := m.registerProbe(i)       // TODO: 注册Probe
 		if err != nil {
 			return err
 		}

@@ -45,7 +45,7 @@ const (
 
 // New returns a new [probe.Probe].
 func New(logger logr.Logger) probe.Probe {
-	log.Info("I_TEST", "New", "HTTPServer")
+	log.Info("I_TEST", "New", "HTTPServer") // [2024/05/08 13:02:20] [info] probe.go:48 I_TESTNewHTTPServer
 	id := probe.ID{
 		SpanKind:        trace.SpanKindServer,
 		InstrumentedPkg: pkg,
@@ -122,7 +122,7 @@ func New(logger logr.Logger) probe.Probe {
 			},
 		},
 
-		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) {
+		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) { // TODO: ???
 			return perf.NewReader(obj.Events, os.Getpagesize())
 		},
 		SpecFn:    loadBpf,      // TODO: 加载BPF

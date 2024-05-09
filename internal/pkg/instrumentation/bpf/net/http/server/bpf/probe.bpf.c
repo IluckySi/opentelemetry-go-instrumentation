@@ -205,6 +205,8 @@ static __always_inline struct span_context *extract_context_from_req_headers(voi
 SEC("uprobe/HandlerFunc_ServeHTTP")
 int uprobe_HandlerFunc_ServeHTTP(struct pt_regs *ctx)
 {
+    bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, "Iabc", 4); // TODO: 测试
+
     void *req_ctx_ptr = get_Go_context(ctx, 4, ctx_ptr_pos, false);
     void *key = get_consistent_key(ctx, req_ctx_ptr);
     void *httpReq_ptr = bpf_map_lookup_elem(&http_server_uprobes, &key);

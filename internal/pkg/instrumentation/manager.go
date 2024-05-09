@@ -148,7 +148,7 @@ func (m *Manager) FilterUnusedProbes(target *process.TargetDetails) {
 
 // Run runs the event processing loop for all managed probes.
 func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error {
-	m.logger.Info("-------------------——Run--------------------")
+	m.logger.Info("-------------------Manager——Run--------------------")
 	if len(m.probes) == 0 {
 		err := errors.New("no instrumentation for target process")
 		close(m.closingErrors)
@@ -165,7 +165,7 @@ func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error 
 	for _, i := range m.probes {
 		go func(p probe.Probe) {
 			defer m.wg.Done()
-			p.Run(m.incomingEvents)
+			p.Run(m.incomingEvents) // TODO: 核心方法，开始接收EBPF程序传出的数据->chan中
 		}(i)
 	}
 
@@ -183,7 +183,7 @@ func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error 
 			m.closingErrors <- err
 			return nil
 		case e := <-m.incomingEvents:
-			m.otelController.Trace(e)
+			m.otelController.Trace(e) // TODO: 核心方法发送数据
 		}
 	}
 }

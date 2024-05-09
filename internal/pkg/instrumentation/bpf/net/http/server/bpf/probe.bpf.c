@@ -233,7 +233,7 @@ int uprobe_HandlerFunc_ServeHTTP(struct pt_regs *ctx)
 
     // Propagate context
     void *req_ptr = get_argument(ctx, 4);
-    struct span_context *parent_ctx = extract_context_from_req_headers((void*)(req_ptr + headers_ptr_pos));
+    struct span_context *parent_ctx = extract_context_from_req_headers((void*)(req_ptr + headers_ptr_pos)); // TODO: 传输上下文
     if (parent_ctx != NULL)
     {
         // found parent context in http headers
@@ -253,7 +253,7 @@ int uprobe_HandlerFunc_ServeHTTP(struct pt_regs *ctx)
     }
 
     bpf_map_update_elem(&http_server_uprobes, &key, uprobe_data, 0);
-    start_tracking_span(req_ctx_ptr, &http_server_span->sc);
+    start_tracking_span(req_ctx_ptr, &http_server_span->sc);   // TODO: 发送数据
     return 0;
 }
 
@@ -305,7 +305,7 @@ int uprobe_HandlerFunc_ServeHTTP_Returns(struct pt_regs *ctx) {
 
     // status code
     bpf_probe_read(&http_server_span->status_code, sizeof(http_server_span->status_code), (void *)(resp_ptr + status_code_pos));
-
+    // TODO: 核心方法: 通过bpf_perf_event_output方法将数据发到应用层......
     bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, http_server_span, sizeof(*http_server_span));
     stop_tracking_span(&http_server_span->sc, &http_server_span->psc);
     return 0;

@@ -122,7 +122,7 @@ func New(logger logr.Logger) probe.Probe {
 			},
 		},
 
-		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) { // TODO: ???
+		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) { // TODO: 关键方法,接收EBPF程序的数据
 			return perf.NewReader(obj.Events, os.Getpagesize())
 		},
 		SpecFn:    loadBpf,      // TODO: 加载BPF
@@ -144,33 +144,36 @@ func (c patternPathSupportedConst) InjectOption(td *process.TargetDetails) (inje
 
 func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetDetails, obj *bpfObjects) ([]link.Link, error) {
 	offset, err := target.GetFunctionOffset(name)
-	log.Info("I_TEST", "name", name, "offset", offset) // [2024/05/09 02:13:23] [info] probe.go:147 I_TESTnamenet/http.serverHandler.ServeHTTPoffset2248992
+	log.Info("I_TEST", "name", name, "offset", offset) // I_TESTnamenet/http.serverHandler.ServeHTTPoffset2248992
 	if err != nil {
 		return nil, err
 	}
 
 	opts := &link.UprobeOptions{Address: offset, PID: target.PID}
-	log.Info("I_TEST", "opts", opts) // [2024/05/09 03:51:24] [info] probe.go:153 I_TESTopts&{2248992 0 76102 0 0 }
-
-	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts)
+	log.Info("I_TEST", "opts", opts, "obj.UprobeHandlerFuncServeHTTP", obj.UprobeHandlerFuncServeHTTP) // I_TESTopts&{2248992 0 76102 0 0 }
+	// link.Executable.Uprobe是一个函数，用于在用户空间执行uprobes, uprobes是Linux内核中的一种功能，允许用户在指定的代码地址上插入断点，
+	// 以便在运行时监视和分析程序的行为。这对于调试和性能优化非常有用。
+	// 创建EBPF程序: SEC("uprobe/HandlerFunc_ServeHTTP"), 当HandlerFunc_ServeHTTP函数执行时会触发对应的方法....
+	// obj.UprobeHandlerFuncServeHTTP ->  *ebpf.Program `ebpf:"uprobe_HandlerFunc_ServeHTTP"`,在probe.bpf.c文件中
+	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts) // TODO: 调C的方法了？？？确实...
 	if err != nil {
 		return nil, err
 	}
-	log.Info("I_TEST", "l", l) // [2024/05/09 03:51:24] [info] probe.go:159 I_TESTl&{{0xc000abcd38 } 0xc00059e4d0}
+	log.Info("I_TEST", "link", l) // I_TESTlink&{{0xc000abcd38 } 0xc00059e4d0}
 	links := []link.Link{l}
 
 	retOffsets, err := target.GetFunctionReturns(name)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("I_TEST", "retOffsets", retOffsets) // [2024/05/09 03:51:24] [info] probe.go:166 I_TESTretOffsets[2249139]
+	log.Info("I_TEST", "retOffsets", retOffsets) // I_TESTretOffsets[2249139]
 
 	for _, ret := range retOffsets {
 		opts := &link.UprobeOptions{Address: ret}
-		log.Info("I_TEST", "opts", opts) // [2024/05/09 03:51:24] [info] probe.go:170 I_TESTopts&{2249139 0 0 0 0 }
+		log.Info("I_TEST", "opts", opts) // I_TESTopts&{2249139 0 0 0 0 }
 
 		l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP_Returns, opts)
-		log.Info("I_TEST", "l", l) // [2024/05/09 03:51:24] [info] probe.go:173 I_TESTl&{{0xc000abcda8 } 0xc00059e530}
+		log.Info("I_TEST", "link", l) // I_TESTlink&{{0xc000abcda8 } 0xc00059e530}
 		if err != nil {
 			return nil, err
 		}

@@ -150,27 +150,27 @@ func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetD
 	}
 
 	opts := &link.UprobeOptions{Address: offset, PID: target.PID}
-	log.Info("I_TEST", "opts", opts)
+	log.Info("I_TEST", "opts", opts) // [2024/05/09 03:51:24] [info] probe.go:153 I_TESTopts&{2248992 0 76102 0 0 }
 
 	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("I_TEST", "l", l)
+	log.Info("I_TEST", "l", l) // [2024/05/09 03:51:24] [info] probe.go:159 I_TESTl&{{0xc000abcd38 } 0xc00059e4d0}
 	links := []link.Link{l}
 
 	retOffsets, err := target.GetFunctionReturns(name)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("I_TEST", "retOffsets", retOffsets)
+	log.Info("I_TEST", "retOffsets", retOffsets) // [2024/05/09 03:51:24] [info] probe.go:166 I_TESTretOffsets[2249139]
 
 	for _, ret := range retOffsets {
 		opts := &link.UprobeOptions{Address: ret}
-		log.Info("I_TEST", "opts", opts)
+		log.Info("I_TEST", "opts", opts) // [2024/05/09 03:51:24] [info] probe.go:170 I_TESTopts&{2249139 0 0 0 0 }
 
 		l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP_Returns, opts)
-		log.Info("I_TEST", "l", l)
+		log.Info("I_TEST", "l", l) // [2024/05/09 03:51:24] [info] probe.go:173 I_TESTl&{{0xc000abcda8 } 0xc00059e530}
 		if err != nil {
 			return nil, err
 		}

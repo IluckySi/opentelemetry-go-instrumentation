@@ -103,7 +103,7 @@ func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetD
 	if err != nil {
 		return err
 	}
-	// i.Logger.Info("I_TEST", "spec", spec)  TODO: 核心
+	i.Logger.Info("I_TEST", "spec", spec) // TODO:
 
 	err = i.injectConsts(td, spec) // TODO:
 	if err != nil {
@@ -114,10 +114,10 @@ func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetD
 	if err != nil {
 		return err
 	}
-	i.Logger.Info("I_TEST", "obj", spec)
+	i.Logger.Info("I_TEST", "obj", spec) // ??? {"level":"info","ts":1715226684.7854648,"logger":"Instrumentation.Manager.net/http/server","caller":"probe/probe.go:117","msg":"I_TEST","obj":{"Maps":{".rodata":{"Name":".rodata","Type":2,"KeySize":4,"ValueSize":144,"MaxEntries":1,"Flags":128,"Pinning":0,"NumaNode":0,"Contents":[{"Key":0,"Value":"6AAAAAAAAAA4AAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAsAAAAAAAAACAAAAAAAAAABgAAAAAAAAAeAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA"}],"Freeze":true,"InnerMap":null,"Extra":null,"Key":{},"Value":{"Name":".rodata","Size":144,"Vars":[{"Type":{"Name":"ctx_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":0,"Size":8},{"Type":{"Name":"headers_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":8,"Size":8},{"Type":{"Name":"req_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":16,"Size":8},{"Type":{"Name":"url_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":24,"Size":8},{"Type":{"Name":"method_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}}
 
 	i.reader, err = i.ReaderFn(*obj)
-	i.Logger.Info("I_TEST", "i.reader", i.reader)
+	i.Logger.Info("I_TEST", "i.reader", i.reader) // "i.reader":{}
 	if err != nil {
 		return err
 	}
@@ -151,9 +151,9 @@ func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.Tar
 	}
 	i.Logger.Info("********************")
 	for _, up := range i.Uprobes {
-		i.Logger.Info("I_TEST", "up", up)
-		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: 核心方法: attach the eBPF program to the function.
-		i.Logger.Info("I_TEST", "links", links)
+		i.Logger.Info("I_TEST", "up", up, "up.fn", up.Fn, "up.sym", up.Sym) // {"level":"info","ts":1715226684.7488635,"logger":"Instrumentation.Manager.net/http/server","caller":"probe/probe.go:154","msg":"I_TEST","upError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"}
+		links, err := up.Fn(up.Sym, exec, td, obj)                          // TODO: 核心方法: attach the eBPF program to the function.
+		i.Logger.Info("I_TEST", "links", links)                             // "links":[{},{}]
 		if err != nil {
 			if up.Optional {
 				i.Logger.Info("failed to attach optional uprobe", "probe", i.ID, "symbol", up.Sym, "error", err)

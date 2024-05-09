@@ -29,7 +29,7 @@ import (
 	otelTraceGlobal "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/go.opentelemetry.io/otel/traceglobal"
 	//grpcClient "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client"
 	//grpcServer "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/server"
-	httpClient "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/client"
+	//httpClient "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/client"
 	httpServer "go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server"
 	"go.opentelemetry.io/auto/internal/pkg/instrumentation/bpffs"
 	"go.opentelemetry.io/auto/internal/pkg/instrumentation/probe"
@@ -252,7 +252,7 @@ func (m *Manager) registerProbes() error {
 		//grpcClient.New(m.logger),
 		//grpcServer.New(m.logger),
 		httpServer.New(m.logger),
-		httpClient.New(m.logger),
+		// httpClient.New(m.logger),
 		//dbSql.New(m.logger),
 		//kafkaProducer.New(m.logger),
 		//kafkaConsumer.New(m.logger),

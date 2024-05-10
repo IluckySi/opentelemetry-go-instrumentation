@@ -98,14 +98,14 @@ func main() {
 		instOptions = append(instOptions, auto.WithGlobal())
 	}
 
-	inst, err := auto.NewInstrumentation(ctx, instOptions...)
+	inst, err := auto.NewInstrumentation(ctx, instOptions...) // TODO: 入口方法
 	if err != nil {
 		logger.Error(err, "failed to create instrumentation")
 		return
 	}
 
 	logger.Info("starting instrumentation...")
-	if err = inst.Run(ctx); err != nil && !errors.Is(err, process.ErrInterrupted) {
+	if err = inst.Run(ctx); err != nil && !errors.Is(err, process.ErrInterrupted) { // TODO: 入口方法
 		logger.Error(err, "instrumentation crashed")
 	}
 }

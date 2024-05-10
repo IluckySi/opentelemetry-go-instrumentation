@@ -17,6 +17,7 @@ package auto
 import (
 	"context"
 	"debug/buildinfo"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -105,7 +106,7 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "instConfig", c)                         // --"instConfig":{}
+	logger.Info("I_TEST", "instConfig", json.Marshal(c))           // --"instConfig":{}
 	logger.Info("I_TEST", "instConfig.target", c.target)           // --"instConfig.target":{"ExePath":"/data/ilucky/otel/go_http_demo","Pid":0}
 	logger.Info("I_TEST", "instConfig.serviceName", c.serviceName) // --"instConfig.serviceName":"i_go_http_demo"
 

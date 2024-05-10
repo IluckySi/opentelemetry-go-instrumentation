@@ -107,6 +107,7 @@ func (a *Analyzer) Analyze(pid int, relevantFuncs map[string]interface{}) (*Targ
 	if err != nil {
 		return nil, err
 	}
+	a.logger.Info("I_TEST", "funcs", funcs)
 	for _, fn := range funcs {
 		//root@ubuntu22:/data/ilucky/otel# objdump -t  go_http_demo|grep "net/http.serverHandler.ServeHTTP"
 		//0000000000625120 g     F .text	00000000000000c6              net/http.serverHandler.ServeHTTP
@@ -134,12 +135,12 @@ func (a *Analyzer) SetBuildInfo(pid int) error {
 	a.logger.Info("I_TEST", "f.name", f.Name()) // "f.name":"/proc/76102/exe"
 
 	defer f.Close()
-	bi, err := buildinfo.Read(f) // TODO: Read returns build information embedded in a Go binary file
+	bi, err := buildinfo.Read(f) // TODO: 核心包buildinfo: Read returns build information embedded in a Go binary file
 	if err != nil {
 		return err
 	}
 	a.logger.Info("I_TEST", "buildinfo", bi) // "buildinfo":"go\tgo1.21.1\npath\tcommand-line-arguments\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tCGO_ENABLED=1\nbuild\tCGO_CFLAGS=\nbuild\tCGO_CPPFLAGS=\nbuild\tCGO_CXXFLAGS=\nbuild\tCGO_LDFLAGS=\nbuild\tGOARCH=amd64\nbuild\tGOOS=linux\nbuild\tGOAMD64=v1\n"
-
+	a.logger.Info("I_TEST", "GoVersion", bi.GoVersion)
 	bi.GoVersion = parseGoVersion(bi.GoVersion)
 	a.logger.Info("I_TEST", "GoVersion", bi.GoVersion) // "GoVersion":"1.21.1"
 
@@ -158,7 +159,7 @@ func parseGoVersion(vers string) string {
 }
 
 func (a *Analyzer) findFunctions(elfF *elf.File, relevantFuncs map[string]interface{}) ([]*binary.Func, error) {
-	result, err := binary.FindFunctionsUnStripped(elfF, relevantFuncs)
+	result, err := binary.FindFunctionsUnStripped(elfF, relevantFuncs) // TODO: 核心方法
 	log.Info("I_TEST", "result", result)
 	if err != nil {
 		if errors.Is(err, elf.ErrNoSymbols) {

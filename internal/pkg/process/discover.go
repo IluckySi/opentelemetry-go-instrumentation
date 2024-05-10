@@ -96,7 +96,7 @@ func (a *Analyzer) DiscoverProcessID(ctx context.Context, target *TargetArgs) (i
 
 func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error) {
 	for {
-		dirs, err := proc.Readdir(15)
+		dirs, err := proc.Readdir(15) // TODO: 15个目录15个目录的读取, 这样会节省资源吗?
 		if err == io.EOF {
 			break
 		}
@@ -105,8 +105,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 			return 0, err
 		}
 
-		for _, di := range dirs { // TODO: 找到对应的进程
-			// a.logger.Info("I_TEST", "di", di, "di.Name", di.Name()) // --"di.Name":"fs"
+		for _, di := range dirs {
 			if !di.IsDir() {
 				continue
 			}
@@ -121,7 +120,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 			}
 
 			exeName, err := os.Readlink(path.Join("/proc", dname, "exe"))
-			// a.logger.Info("I_TEST", "pid", pid, "exeName", exeName)
+			a.logger.Info("I_TEST", "dname", dname, "pid", pid, "exeName", exeName)
 			if err != nil {
 				// Read link may fail if target process runs not as root
 				cmdLine, err := os.ReadFile(path.Join("/proc", dname, "cmdline"))
@@ -129,7 +128,7 @@ func (a *Analyzer) findProcessID(target *TargetArgs, proc *os.File) (int, error)
 					return 0, err
 				}
 
-				// a.logger.Info("I_TEST", "cmdline", cmdLine, "contains", strings.Contains(string(cmdLine), target.ExePath))
+				a.logger.Info("I_TEST", "cmdline", cmdLine, "contains", strings.Contains(string(cmdLine), target.ExePath))
 				if strings.Contains(string(cmdLine), target.ExePath) {
 					return pid, nil
 				}

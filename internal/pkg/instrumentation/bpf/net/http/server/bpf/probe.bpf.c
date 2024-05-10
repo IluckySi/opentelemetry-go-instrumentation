@@ -205,7 +205,7 @@ static __always_inline struct span_context *extract_context_from_req_headers(voi
 SEC("uprobe/HandlerFunc_ServeHTTP")
 int uprobe_HandlerFunc_ServeHTTP(struct pt_regs *ctx)
 {
-    // bpf_printk("I_TEST: start................"); // TODO: 测试
+    // TODO: 测试
     bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, "I_TEST:start", 12);
     void *req_ctx_ptr = get_Go_context(ctx, 4, ctx_ptr_pos, false);
     void *key = get_consistent_key(ctx, req_ctx_ptr);
@@ -271,7 +271,7 @@ void read_go_string(void *base, int offset, char *output, int maxLen, const char
 // func (sh serverHandler) ServeHTTP(rw ResponseWriter, req *Request)
 SEC("uprobe/HandlerFunc_ServeHTTP")
 int uprobe_HandlerFunc_ServeHTTP_Returns(struct pt_regs *ctx) {
-    // bpf_printk("I_TEST: end................"); // TODO: 测试
+    // TODO: 测试
     bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, "I_TEST:end", 10);
     u64 end_time = bpf_ktime_get_ns();
     void *req_ctx_ptr = get_Go_context(ctx, 4, ctx_ptr_pos, false);

@@ -57,7 +57,7 @@ type Probe interface {
 // This type can be returned by instrumentation directly. Instrumentation can
 // also wrap this implementation with their own type if they need to override
 // default behavior.
-type Base[BPFObj any, BPFEvent any] struct {
+type Base[BPFObj any, BPFEvent any] struct { // TODO: 核心结构体
 	// ID is a unique identifier for the probe.
 	ID ID
 	// Logger is used to log operations and errors.
@@ -99,24 +99,24 @@ func (i *Base[BPFObj, BPFEvent]) Manifest() Manifest {
 
 // Load loads all instrumentation offsets. // TODO: 加载所有instrumentation offsets.
 func (i *Base[BPFObj, BPFEvent]) Load(exec *link.Executable, td *process.TargetDetails) error {
-	spec, err := i.SpecFn()
+	spec, err := i.SpecFn() // 获取加载EBPF程序的方法
 	if err != nil {
 		return err
 	}
-	i.Logger.Info("I_TEST", "spec", spec) // TODO:
+	i.Logger.Info("I_TEST", "spec", spec) //
 
-	err = i.injectConsts(td, spec) // TODO:
+	err = i.injectConsts(td, spec) // TODO: 核心方法, 写入常量
 	if err != nil {
 		return err
 	}
 
-	obj, err := i.buildObj(exec, td, spec) // TODO:
+	obj, err := i.buildObj(exec, td, spec) // TODO: 核心方法, 构建EBPFObject
 	if err != nil {
 		return err
 	}
 	i.Logger.Info("I_TEST", "obj", spec) // ??? {"level":"info","ts":1715226684.7854648,"logger":"Instrumentation.Manager.net/http/server","caller":"probe/probe.go:117","msg":"I_TEST","obj":{"Maps":{".rodata":{"Name":".rodata","Type":2,"KeySize":4,"ValueSize":144,"MaxEntries":1,"Flags":128,"Pinning":0,"NumaNode":0,"Contents":[{"Key":0,"Value":"6AAAAAAAAAA4AAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAsAAAAAAAAACAAAAAAAAAABgAAAAAAAAAeAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA"}],"Freeze":true,"InnerMap":null,"Extra":null,"Key":{},"Value":{"Name":".rodata","Size":144,"Vars":[{"Type":{"Name":"ctx_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":0,"Size":8},{"Type":{"Name":"headers_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":8,"Size":8},{"Type":{"Name":"req_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":16,"Size":8},{"Type":{"Name":"url_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}},"Linkage":1},"Offset":24,"Size":8},{"Type":{"Name":"method_ptr_pos","Type":{"Type":{"Type":{"Name":"u64","Type":{"Name":"__u64","Type":{"Name":"unsigned long long","Size":8,"Encoding":0}}}}}
 
-	i.reader, err = i.ReaderFn(*obj)              // HTTPServer的reaer: return perf.NewReader(obj.Events, os.Getpagesize())
+	i.reader, err = i.ReaderFn(*obj)              // HTTPServer的reader: return perf.NewReader(obj.Events, os.Getpagesize()), TODO: 后面就可以从ebpf程序read数据了.
 	i.Logger.Info("I_TEST", "i.reader", i.reader) // "i.reader":{}
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (i *Base[BPFObj, BPFEvent]) injectConsts(td *process.TargetDetails, spec *e
 	if err != nil {
 		return err
 	}
-	return inject.Constants(spec, opts...)
+	return inject.Constants(spec, opts...) // TODO: 在consts.go文件里面
 }
 
 func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.TargetDetails, spec *ebpf.CollectionSpec) (*BPFObj, error) {
@@ -146,14 +146,15 @@ func (i *Base[BPFObj, BPFEvent]) buildObj(exec *link.Executable, td *process.Tar
 		},
 	}
 	err := utils.LoadEBPFObjects(spec, obj, sOpts) // TODO: ???
+	i.Logger.Info("I_TEST", "spec", "spec", "obj", obj, "sOpts", sOpts)
 	if err != nil {
 		return nil, err
 	}
-	i.Logger.Info("********************")
+
 	for _, up := range i.Uprobes {
 		// {"level":"info","ts":1715236054.0010176,"logger":"Instrumentation.Manager.net/http/server","caller":"probe/probe.go:154","msg":"I_TEST","upError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]","up.fnError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]","up.sym":"net/http.serverHandler.ServeHTTP"}
 		i.Logger.Info("I_TEST", "up", up, "up.fn", up.Fn, "up.sym", up.Sym)
-		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: 核心方法: attach the eBPF program to the function.
+		links, err := up.Fn(up.Sym, exec, td, obj) // TODO: 核心方法: attach the eBPF program to the function.  Httpserver对应的Fn是: uprobeServeHTTP
 		i.Logger.Info("I_TEST", "links", links)    // "links":[{},{}]
 		if err != nil {
 			if up.Optional {
@@ -232,6 +233,7 @@ func (i *Base[BPFObj, BPFEvent]) Close() error {
 	return err
 }
 
+// TODO: 核心重点
 // UprobeFunc is a function that will attach a eBPF program to a perf event
 // that fires when the given symbol starts executing in exec.
 //
@@ -244,10 +246,10 @@ func (i *Base[BPFObj, BPFEvent]) Close() error {
 type UprobeFunc[BPFObj any] func(symbol string, exec *link.Executable, target *process.TargetDetails, obj *BPFObj) ([]link.Link, error)
 
 // Uprobe is an eBPF program that is attached in the entry point and/or the reutrn of a function.
-type Uprobe[BPFObj any] struct {
+type Uprobe[BPFObj any] struct { // TODO: 核心结构体
 	// Sym is the symbol name of the function to attach the eBPF program to.
 	Sym string
-	// Fn is the function that will attach the eBPF program to the function.
+	// Fn is the function that will attach the eBPF program to the function. // TODO: 核心方法
 	Fn UprobeFunc[BPFObj]
 	// Optional is a boolean flag informing if the Uprobe is optional. If the
 	// Uprobe is optional and fails to attach, the error is logged and

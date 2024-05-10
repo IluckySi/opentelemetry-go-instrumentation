@@ -106,7 +106,7 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
-	logger.Info("I_TEST", "instConfig", json.Marshal(c))           // --"instConfig":{}
+	logger.Info("I_TEST", "instConfig", c)                         // --"instConfig":{}  TODO: 如何打印一个对象呢?
 	logger.Info("I_TEST", "instConfig.target", c.target)           // --"instConfig.target":{"ExePath":"/data/ilucky/otel/go_http_demo","Pid":0}
 	logger.Info("I_TEST", "instConfig.serviceName", c.serviceName) // --"instConfig.serviceName":"i_go_http_demo"
 
@@ -129,12 +129,12 @@ func NewInstrumentation(ctx context.Context, opts ...InstrumentationOption) (*In
 		return nil, err
 	}
 
-	mngr, err := instrumentation.NewManager(logger, ctrl, c.globalImpl) // TODO:
+	mngr, err := instrumentation.NewManager(logger, ctrl, c.globalImpl) // TODO: 入口方法
 	if err != nil {
 		return nil, err
 	}
 
-	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs()) // TODO: 解析二进制数据获取方法对应的offset
+	td, err := pa.Analyze(pid, mngr.GetRelevantFuncs()) // TODO: 核心方法, 解析二进制数据获取方法对应的offset
 	if err != nil {
 		return nil, err
 	}

@@ -56,7 +56,7 @@ func NewManager(logger logr.Logger, otelController *opentelemetry.Controller, gl
 		logger:         logger,
 		probes:         make(map[probe.ID]probe.Probe),
 		done:           make(chan bool, 1),
-		incomingEvents: make(chan *probe.Event),
+		incomingEvents: make(chan *probe.Event), // TODO: 数据存放chan
 		otelController: otelController,
 		globalImpl:     globalImpl,
 		closingErrors:  make(chan error, 1),
@@ -92,8 +92,8 @@ func (m *Manager) validateProbeDependents(id probe.ID, symbols []probe.FunctionS
 }
 
 func (m *Manager) registerProbe(p probe.Probe) error {
-	m.logger.Info("I_TEST", "probe", p) // 以httpserver为例: "probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
-	id := p.Manifest().Id
+	// m.logger.Info("I_TEST", "probe", p) // 以httpserver为例: "probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
+	id := p.Manifest().Id                          // TODO: p.Manifest() ???
 	m.logger.Info("I_TEST", "p.Manifest().Id", id) // "p.Manifest().Id":"net/http/server"
 	if _, exists := m.probes[id]; exists {
 		return fmt.Errorf("library %s registered twice, aborting", id)
@@ -101,7 +101,7 @@ func (m *Manager) registerProbe(p probe.Probe) error {
 
 	if err := m.validateProbeDependents(id, p.Manifest().Symbols); err != nil {
 		return err
-	} // TODO:PR:id.Symbols
+	} // TODO:PR: id.Symbols 简化代码逻辑
 
 	m.probes[id] = p
 	return nil
@@ -148,7 +148,7 @@ func (m *Manager) FilterUnusedProbes(target *process.TargetDetails) {
 
 // Run runs the event processing loop for all managed probes.
 func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error {
-	m.logger.Info("-------------------Manager——Run--------------------")
+	m.logger.Info("-------------------Manager Run--------------------")
 	if len(m.probes) == 0 {
 		err := errors.New("no instrumentation for target process")
 		close(m.closingErrors)
@@ -183,31 +183,31 @@ func (m *Manager) Run(ctx context.Context, target *process.TargetDetails) error 
 			m.closingErrors <- err
 			return nil
 		case e := <-m.incomingEvents:
-			m.otelController.Trace(e) // TODO: 核心方法发送数据
+			m.otelController.Trace(e) // TODO: 核心方法，发送数据
 		}
 	}
 }
 
 func (m *Manager) load(target *process.TargetDetails) error {
-	// Allow the current process to lock memory for eBPF resources.  // TODO: lock memory是什么行为?
+	// Allow the current process to lock memory for eBPF resources.  // TODO: lock memory是什么行为???????
 	if err := rlimit.RemoveMemlock(); err != nil {
 		return err
 	}
 
-	exe, err := link.OpenExecutable(fmt.Sprintf("/proc/%d/exe", target.PID))
+	exe, err := link.OpenExecutable(fmt.Sprintf("/proc/%d/exe", target.PID)) // TODO: 打开可执行文件......
 	if err != nil {
 		return err
 	}
 	m.logger.Info("I_TEST", "exe", exe) // "exe":{}
 
-	if err := m.mount(target); err != nil {
+	if err := m.mount(target); err != nil { // TODO: 这是什么行为呢? 挂载目录??????
 		return err
-	} // TODO: 这是什么行为呢? 挂载目录??????
+	}
 
 	// Load probes
 	for name, i := range m.probes {
-		m.logger.Info("loading probe", "probe", i, "name", name) // {"level":"info","ts":1715220803.3591125,"logger":"Instrumentation.Manager","caller":"instrumentation/manager.go:208","msg":"loading probe","probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]","name":"net/http/server"}
-		err := i.Load(exe, target)                               // TODO: 核心方法
+		m.logger.Info("loading probe", "probe", i, "name", name) // "msg":"loading probe","probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]","name":"net/http/server"}
+		err := i.Load(exe, target)                               // TODO: 核心方法, 为可执行文件特定方法"埋点"
 		if err != nil {
 			m.logger.Error(err, "error while loading probes, cleaning up", "name", name)
 			return errors.Join(err, m.cleanup(target))
@@ -257,14 +257,15 @@ func (m *Manager) registerProbes() error {
 		//kafkaProducer.New(m.logger),
 		//kafkaConsumer.New(m.logger),
 	}
-	m.logger.Info("I_TEST", "insts.probe", insts) // "insts.probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client.bpfObjects]"
+
+	m.logger.Info("I_TEST", "m.globalImpl", m.globalImpl, "insts.probe", insts) // "insts.probeError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/google.golang.org/grpc/client.bpfObjects]"
 	if m.globalImpl {
 		insts = append(insts, otelTraceGlobal.New(m.logger))
 	}
 
 	for _, i := range insts {
-		m.logger.Info("I_TEST", "i", i) // {"level":"info","ts":1715173340.1835983,"logger":"Instrumentation.Manager","caller":"instrumentation/manager.go:264","msg":"I_TEST","iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
-		err := m.registerProbe(i)       // TODO: 注册Probe
+		m.logger.Info("I_TEST", "i", i, "i.id", i.ID) // {"iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
+		err := m.registerProbe(i)                     // TODO: 注册Probe
 		if err != nil {
 			return err
 		}

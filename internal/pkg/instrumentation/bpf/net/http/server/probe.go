@@ -45,15 +45,15 @@ const (
 
 // New returns a new [probe.Probe].
 func New(logger logr.Logger) probe.Probe {
-	log.Info("I_TEST", "New", "HTTPServer") // [2024/05/08 13:02:20] [info] probe.go:48 I_TESTNewHTTPServer
+	log.Info("I_TEST", "New", "HTTPServer") // I_TESTNewHTTPServer
 	id := probe.ID{
-		SpanKind:        trace.SpanKindServer,
+		SpanKind:        trace.SpanKindServer, // TODO: 使用Server和net/http唯一标识Probe
 		InstrumentedPkg: pkg,
 	}
-	return &probe.Base[bpfObjects, event]{
+	return &probe.Base[bpfObjects, event]{ // TODO: type Base[BPFObj any, BPFEvent any] struct 是泛型结构体, 包含两个泛型字段 `BPFObj` 和 `BPFEvent`
 		ID:     id,
 		Logger: logger.WithName(id.String()),
-		Consts: []probe.Const{
+		Consts: []probe.Const{ // TODO: 这些常量用来做什么呢?
 			probe.RegistersABIConst{},
 			probe.StructFieldConst{
 				Key: "method_ptr_pos",
@@ -99,7 +99,7 @@ func New(logger logr.Logger) probe.Probe {
 				Key: "proto_pos",
 				Val: structfield.NewID("std", "net/http", "Request", "Proto"),
 			},
-			probe.StructFieldConstMinVersion{
+			probe.StructFieldConstMinVersion{ // TODO: 这和上面的有什么区别?
 				StructField: probe.StructFieldConst{
 					Key: "req_pat_pos",
 					Val: structfield.NewID("std", "net/http", "Request", "pat"),
@@ -122,11 +122,11 @@ func New(logger logr.Logger) probe.Probe {
 			},
 		},
 
-		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) { // TODO: 关键方法,接收EBPF程序的数据
+		ReaderFn: func(obj bpfObjects) (*perf.Reader, error) { // TODO: 关键方法,接收EBPF程序的数据, 通过性能事件方式...
 			return perf.NewReader(obj.Events, os.Getpagesize())
 		},
 		SpecFn:    loadBpf,      // TODO: 加载BPF
-		ProcessFn: convertEvent, // TODO: 转换事件
+		ProcessFn: convertEvent, // TODO: 转换来自EBPF的数据, 并最终发送到Collector
 	}
 }
 
@@ -144,7 +144,7 @@ func (c patternPathSupportedConst) InjectOption(td *process.TargetDetails) (inje
 
 func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetDetails, obj *bpfObjects) ([]link.Link, error) {
 	offset, err := target.GetFunctionOffset(name)
-	log.Info("I_TEST", "name", name, "offset", offset) // I_TESTnamenet/http.serverHandler.ServeHTTPoffset2248992
+	log.Info("I_TEST", "name", name, "exec", exec, "offset", offset, "target", target, "obj", obj) // I_TESTnamenet/http.serverHandler.ServeHTTPoffset2248992
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func uprobeServeHTTP(name string, exec *link.Executable, target *process.TargetD
 	// 以便在运行时监视和分析程序的行为。这对于调试和性能优化非常有用。
 	// 创建EBPF程序: SEC("uprobe/HandlerFunc_ServeHTTP"), 当HandlerFunc_ServeHTTP函数执行时会触发对应的方法....
 	// obj.UprobeHandlerFuncServeHTTP ->  *ebpf.Program `ebpf:"uprobe_HandlerFunc_ServeHTTP"`,在probe.bpf.c文件中
-	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts) // TODO: 调C的方法了？？？确实...
+	l, err := exec.Uprobe("", obj.UprobeHandlerFuncServeHTTP, opts) // TODO: 核心方法, 绑定了c的方法了.
 	if err != nil {
 		return nil, err
 	}

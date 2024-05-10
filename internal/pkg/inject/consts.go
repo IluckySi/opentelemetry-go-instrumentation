@@ -65,7 +65,7 @@ func Constants(spec *ebpf.CollectionSpec, opts ...Option) error {
 	if len(consts) == 0 {
 		return nil
 	}
-	return spec.RewriteConstants(consts)
+	return spec.RewriteConstants(consts) // TODO: injects key-values defined by opts into spec as constant
 }
 
 func newConsts(opts []Option) (map[string]interface{}, error) {

@@ -98,7 +98,7 @@ int uprobe_Transport_roundTrip(struct pt_regs *ctx) {
 
     __builtin_memset(httpReq, 0, sizeof(struct http_request_t));
     httpReq->start_time = bpf_ktime_get_ns();
-
+    // TODO: 核心方法, 获取context
     struct span_context *parent_span_ctx = get_parent_span_context(context_ptr_val);
     if (parent_span_ctx != NULL) {
         bpf_probe_read(&httpReq->psc, sizeof(httpReq->psc), parent_span_ctx);
@@ -211,7 +211,7 @@ int uprobe_writeSubset(struct pt_regs *ctx) {
                 bpf_printk("uprobe_writeSubset: Failed to get len from io writer");
                 goto done;
             }
-
+            // TODO: 核心方法, 传输端到端信息
             if (len < (size - W3C_VAL_LENGTH - W3C_KEY_LENGTH - 4)) { // 4 = strlen(":_") + strlen("\r\n")
                 char tp_str[W3C_KEY_LENGTH + 2 + W3C_VAL_LENGTH + 2] = "Traceparent: ";
                 char end[2] = "\r\n";

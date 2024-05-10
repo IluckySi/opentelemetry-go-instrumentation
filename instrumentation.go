@@ -17,7 +17,6 @@ package auto
 import (
 	"context"
 	"debug/buildinfo"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"

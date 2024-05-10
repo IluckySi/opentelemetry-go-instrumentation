@@ -264,8 +264,8 @@ func (m *Manager) registerProbes() error {
 	}
 
 	for _, i := range insts {
-		m.logger.Info("I_TEST", "i", i, "i.id", i.ID) // {"iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
-		err := m.registerProbe(i)                     // TODO: 注册Probe
+		m.logger.Info("I_TEST", "i", i) // {"iError":"json: unsupported type: probe.UprobeFunc[go.opentelemetry.io/auto/internal/pkg/instrumentation/bpf/net/http/server.bpfObjects]"
+		err := m.registerProbe(i)       // TODO: 注册Probe
 		if err != nil {
 			return err
 		}
